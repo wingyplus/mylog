@@ -11,7 +11,7 @@ import (
 func TestLog(t *testing.T) {
 	var buf bytes.Buffer
 	SetOutput(&buf)
-	SetAllowedLevel(ALL)
+	SetAllowedSeverities(ALL)
 
 	Log(DEBUG, "Hello World")
 
@@ -23,7 +23,7 @@ func TestLog(t *testing.T) {
 func TestLog_DoesNotPrintWhenNotAllowed(t *testing.T) {
 	var buf bytes.Buffer
 	SetOutput(&buf)
-	SetAllowedLevel(INFO | WARN)
+	SetAllowedSeverities(INFO | WARN)
 
 	Log(DEBUG, "Hello World")
 
@@ -59,7 +59,7 @@ func BenchmarkLog_Lumberjack(b *testing.B) {
 	defer logger.Close()
 
 	SetOutput(logger)
-	SetAllowedLevel(ALL)
+	SetAllowedSeverities(ALL)
 
 	benchmarkLog(b)
 }
@@ -69,7 +69,7 @@ func BenchmarkLog_BufferedLumberjack(b *testing.B) {
 	defer logger.Close()
 
 	SetOutput(bufio.NewWriter(logger))
-	SetAllowedLevel(ALL)
+	SetAllowedSeverities(ALL)
 
 	benchmarkLog(b)
 }

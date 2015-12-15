@@ -38,7 +38,7 @@ func (logger *Logger) SetOutput(w io.Writer) {
 	logger.writer = w
 }
 
-func (logger *Logger) SetAllowedLevel(lvls Level) {
+func (logger *Logger) SetAllowedSeverities(lvls Level) {
 	logger.allowedLevels = lvls
 }
 
@@ -59,6 +59,6 @@ func SetOutput(w io.Writer) {
 	logger.SetOutput(w)
 }
 
-func SetAllowedLevel(lv Level) {
-	logger.SetAllowedLevel(lv)
+func SetAllowedSeverities(lv Level) {
+	logger.SetAllowedSeverities(lv)
 }
