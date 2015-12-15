@@ -3,8 +3,6 @@ package mylog
 import (
 	"bufio"
 	"bytes"
-	"io"
-	"sync"
 	"testing"
 
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -47,24 +45,6 @@ func benchmarkLog(b *testing.B) {
 	})
 }
 
-type writer struct {
-	io.Writer
-	mu sync.Mutex
-}
-
-func (w *writer) Write(b []byte) (int, error) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
-	return w.Writer.Write(b)
-}
-
-func newWriter(w io.Writer) *writer {
-	return &writer{
-		Writer: w,
-	}
-}
-
 func newLogger(filename string) *lumberjack.Logger {
 	return &lumberjack.Logger{
 		Filename:   filename,
@@ -89,16 +69,6 @@ func BenchmarkLog_BufferedLumberjack(b *testing.B) {
 	defer logger.Close()
 
 	SetOutput(bufio.NewWriter(logger))
-	SetAllowedLevel(ALL)
-
-	benchmarkLog(b)
-}
-
-func BenchmarkLog_MutexBufferedLumberjack(b *testing.B) {
-	logger := newLogger("hello-mutex-buffered-lumberjack.log")
-	defer logger.Close()
-
-	SetOutput(newWriter(bufio.NewWriter(logger)))
 	SetAllowedLevel(ALL)
 
 	benchmarkLog(b)
