@@ -47,7 +47,7 @@ func Log(lv Level, v ...interface{}) {
 		logger.mu.Lock()
 		defer logger.mu.Unlock()
 
-		fmt.Fprint(logger.writer, fmt.Sprint(lv, "|", fmt.Sprint(v...), "\n"))
+		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s\n", lv, fmt.Sprint(v...)))
 	}
 }
 
