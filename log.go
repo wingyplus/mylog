@@ -1,4 +1,4 @@
-//go:generate stringer -type=Level
+//go:generate stringer -type=Severity
 
 package mylog
 
@@ -10,10 +10,10 @@ import (
 	"sync"
 )
 
-type Level int
+type Severity int
 
 const (
-	ERROR Level = 1 << iota
+	ERROR Severity = 1 << iota
 	DEBUG
 	FATAL
 	INFO
@@ -24,7 +24,7 @@ const (
 
 type Logger struct {
 	writer        io.Writer
-	allowedLevels Level
+	allowedLevels Severity
 
 	mu sync.Mutex
 }
@@ -38,11 +38,11 @@ func (logger *Logger) SetOutput(w io.Writer) {
 	logger.writer = w
 }
 
-func (logger *Logger) SetAllowedSeverities(lvls Level) {
+func (logger *Logger) SetAllowedSeverities(lvls Severity) {
 	logger.allowedLevels = lvls
 }
 
-func (logger *Logger) Write(lv Level, v ...interface{}) {
+func (logger *Logger) Write(lv Severity, v ...interface{}) {
 	if (lv & logger.allowedLevels) != 0 {
 		logger.mu.Lock()
 		defer logger.mu.Unlock()
@@ -51,7 +51,7 @@ func (logger *Logger) Write(lv Level, v ...interface{}) {
 	}
 }
 
-func Log(lv Level, v ...interface{}) {
+func Log(lv Severity, v ...interface{}) {
 	logger.Write(lv, v...)
 }
 
@@ -59,6 +59,6 @@ func SetOutput(w io.Writer) {
 	logger.SetOutput(w)
 }
 
-func SetAllowedSeverities(lv Level) {
+func SetAllowedSeverities(lv Severity) {
 	logger.SetAllowedSeverities(lv)
 }
