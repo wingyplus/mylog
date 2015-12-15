@@ -1,6 +1,6 @@
 //go:generate stringer -type=Level
 
-package log
+package mylog
 
 import (
 	"bufio"
