@@ -42,12 +42,11 @@ func (logger *Logger) SetAllowedSeverities(severities Severity) {
 	logger.allowedSeverities = severities
 }
 
-func (logger *Logger) Write(lv Severity, v ...interface{}) {
-	if (lv & logger.allowedSeverities) != 0 {
+func (logger *Logger) Write(severity Severity, v ...interface{}) {
+	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		defer logger.mu.Unlock()
-
-		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s\n", lv, fmt.Sprint(v...)))
+		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s\n", severity, fmt.Sprint(v...)))
+		logger.mu.Unlock()
 	}
 }
 
@@ -59,6 +58,6 @@ func SetOutput(w io.Writer) {
 	logger.SetOutput(w)
 }
 
-func SetAllowedSeverities(lv Severity) {
-	logger.SetAllowedSeverities(lv)
+func SetAllowedSeverities(severities Severity) {
+	logger.SetAllowedSeverities(severities)
 }
