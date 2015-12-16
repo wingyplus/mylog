@@ -50,9 +50,15 @@ func (logger *Logger) Write(severity Severity, v ...interface{}) {
 	}
 }
 
-func Log(lv Severity, v ...interface{}) {
-	logger.Write(lv, v...)
+func Log(severity Severity, v ...interface{}) {
+	logger.Write(severity, v...)
 }
+
+func Info(v ...interface{})  { Log(INFO, v...) }
+func Debug(v ...interface{}) { Log(DEBUG, v...) }
+func Error(v ...interface{}) { Log(ERROR, v...) }
+func Warn(v ...interface{})  { Log(WARN, v...) }
+func Fatal(v ...interface{}) { Log(FATAL, v...) }
 
 func SetOutput(w io.Writer) {
 	logger.SetOutput(w)

@@ -36,11 +36,11 @@ func benchmarkLog(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			Log(DEBUG, "Hello World")
-			Log(INFO, "Hello World")
-			Log(WARN, "Hello World")
-			Log(ERROR, "Hello World")
-			Log(FATAL, "Hello World")
+			Debug("Hello World")
+			Info("Hello World")
+			Warn("Hello World")
+			Error("Hello World")
+			Fatal("Hello World")
 		}
 	})
 }
