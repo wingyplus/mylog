@@ -13,7 +13,7 @@ func TestLog(t *testing.T) {
 	SetOutput(&buf)
 	SetAllowedSeverities(ALL)
 
-	Log(DEBUG, "Hello World")
+	logger.Write(DEBUG, "Hello World")
 
 	if s := buf.String(); s != "DEBUG|Hello World\n" {
 		t.Errorf("Expect DEBUG|Hello World but got %s", s)
@@ -25,7 +25,7 @@ func TestLog_DoesNotPrintWhenNotAllowed(t *testing.T) {
 	SetOutput(&buf)
 	SetAllowedSeverities(INFO | WARN)
 
-	Log(DEBUG, "Hello World")
+	logger.Write(DEBUG, "Hello World")
 
 	if s := buf.String(); s != "" {
 		t.Errorf("Expect empty string but got %s", s)
