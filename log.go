@@ -8,7 +8,10 @@ import (
 	"io"
 	"os"
 	"sync"
+	"time"
 )
+
+var now = time.Now
 
 type Severity int
 
@@ -21,6 +24,8 @@ const (
 
 	ALL = ERROR | DEBUG | FATAL | INFO | WARN
 )
+
+const logTimeFormat = "15:04:05.999999"
 
 type Logger struct {
 	writer            io.Writer
@@ -45,7 +50,7 @@ func (logger *Logger) SetAllowedSeverities(severities Severity) {
 func (logger *Logger) Write(severity Severity, v ...interface{}) {
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s\n", severity, fmt.Sprint(v...)))
+		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s|%s\n", severity, now().Format(logTimeFormat), fmt.Sprint(v...)))
 		logger.mu.Unlock()
 	}
 }
