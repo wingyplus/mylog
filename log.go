@@ -9,11 +9,20 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/mgutz/ansi"
 )
+
+func init() {
+	if os.Getenv("MYLOGCOLOR_DISABLED") == "1" {
+		ansi.DisableColors(true)
+	}
+}
 
 var (
 	now = time.Now
 	pid = os.Getpid()
+	red = ansi.ColorFunc("red")
 )
 
 type Severity int
@@ -55,7 +64,7 @@ func (logger *Logger) Write(severity Severity, v ...interface{}) {
 	msg := fmt.Sprint(v...)
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", severity.String(), timestamp, pid, msg)
+		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", red(severity.String()), timestamp, pid, msg)
 		logger.mu.Unlock()
 	}
 }

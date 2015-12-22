@@ -3,6 +3,7 @@ package mylog
 import (
 	"bufio"
 	"bytes"
+	"os"
 	"testing"
 	"time"
 
@@ -17,7 +18,6 @@ func init() {
 	pid = 1234
 }
 
-// TODO: print color
 func TestLog(t *testing.T) {
 	var buf bytes.Buffer
 	SetOutput(&buf)
@@ -40,6 +40,23 @@ func TestLog_DoesNotPrintWhenNotAllowed(t *testing.T) {
 
 	if s := buf.String(); s != "" {
 		t.Errorf("Expect empty string but got %s", s)
+	}
+}
+
+func TestLog_DebugColor(t *testing.T) {
+	if os.Getenv("MYLOGCOLOR_DISABLED") == "1" {
+		t.SkipNow()
+	}
+
+	var buf bytes.Buffer
+	SetOutput(&buf)
+	SetAllowedSeverities(ALL)
+
+	logger.Write(DEBUG, "Hello World")
+
+	expected := "\033[31mDEBUG\033[0m|17:50:22.615673|1234|Hello World\n"
+	if s := buf.String(); s != expected {
+		t.Errorf("Expect %s but got %s", expected, s)
 	}
 }
 
