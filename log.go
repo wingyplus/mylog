@@ -20,9 +20,15 @@ func init() {
 }
 
 var (
-	now = time.Now
-	pid = os.Getpid()
-	red = ansi.ColorFunc("red")
+	now            = time.Now
+	pid            = os.Getpid()
+	severityColors = map[Severity]func(string) string{
+		DEBUG: ansi.ColorFunc("red"),
+		ERROR: ansi.ColorFunc("red"),
+		FATAL: ansi.ColorFunc("red"),
+		INFO:  ansi.ColorFunc("green"),
+		WARN:  ansi.ColorFunc("yellow"),
+	}
 )
 
 type Severity int
@@ -64,7 +70,7 @@ func (logger *Logger) Write(severity Severity, v ...interface{}) {
 	msg := fmt.Sprint(v...)
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", red(severity.String()), timestamp, pid, msg)
+		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", severityColors[severity](severity.String()), timestamp, pid, msg)
 		logger.mu.Unlock()
 	}
 }

@@ -43,21 +43,35 @@ func TestLog_DoesNotPrintWhenNotAllowed(t *testing.T) {
 	}
 }
 
-func TestLog_DebugColor(t *testing.T) {
+func TestLog_Colors(t *testing.T) {
 	if os.Getenv("MYLOGCOLOR_DISABLED") == "1" {
 		t.SkipNow()
 	}
 
-	var buf bytes.Buffer
-	SetOutput(&buf)
+	colorTestCases := []struct {
+		severity Severity
+		output   string
+	}{
+		{DEBUG, "\033[31mDEBUG\033[0m|17:50:22.615673|1234|Hello World\n"},
+		{INFO, "\033[32mINFO\033[0m|17:50:22.615673|1234|Hello World\n"},
+		{WARN, "\033[33mWARN\033[0m|17:50:22.615673|1234|Hello World\n"},
+		{ERROR, "\033[31mERROR\033[0m|17:50:22.615673|1234|Hello World\n"},
+		{FATAL, "\033[31mFATAL\033[0m|17:50:22.615673|1234|Hello World\n"},
+	}
+
 	SetAllowedSeverities(ALL)
 
-	logger.Write(DEBUG, "Hello World")
+	for _, testcase := range colorTestCases {
+		var buf bytes.Buffer
+		SetOutput(&buf)
 
-	expected := "\033[31mDEBUG\033[0m|17:50:22.615673|1234|Hello World\n"
-	if s := buf.String(); s != expected {
-		t.Errorf("Expect %s but got %s", expected, s)
+		logger.Write(testcase.severity, "Hello World")
+
+		if s := buf.String(); s != testcase.output {
+			t.Errorf("Expect %s but got %s", testcase.output, s)
+		}
 	}
+
 }
 
 func benchmarkLog(b *testing.B) {
