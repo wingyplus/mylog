@@ -11,7 +11,10 @@ import (
 	"time"
 )
 
-var now = time.Now
+var (
+	now = time.Now
+	pid = os.Getpid()
+)
 
 type Severity int
 
@@ -48,9 +51,11 @@ func (logger *Logger) SetAllowedSeverities(severities Severity) {
 }
 
 func (logger *Logger) Write(severity Severity, v ...interface{}) {
+	timestamp := now().Format(logTimeFormat)
+	msg := fmt.Sprint(v...)
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		fmt.Fprint(logger.writer, fmt.Sprintf("%s|%s|%s\n", severity, now().Format(logTimeFormat), fmt.Sprint(v...)))
+		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", severity.String(), timestamp, pid, msg)
 		logger.mu.Unlock()
 	}
 }

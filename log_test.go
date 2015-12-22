@@ -14,10 +14,10 @@ func init() {
 		t, _ := time.Parse(time.RFC3339Nano, "2015-12-21T17:50:22.615673Z")
 		return t
 	}
+	pid = 1234
 }
 
 // TODO: print color
-// TODO: print pid
 func TestLog(t *testing.T) {
 	var buf bytes.Buffer
 	SetOutput(&buf)
@@ -25,8 +25,9 @@ func TestLog(t *testing.T) {
 
 	logger.Write(DEBUG, "Hello World")
 
-	if s := buf.String(); s != "DEBUG|17:50:22.615673|Hello World\n" {
-		t.Errorf("Expect DEBUG|15:04:05.0000000|Hello World but got %s", s)
+	expected := "DEBUG|17:50:22.615673|1234|Hello World\n"
+	if s := buf.String(); s != expected {
+		t.Errorf("Expect %s but got %s", expected, s)
 	}
 }
 
