@@ -1,0 +1,18 @@
+{
+	"ImportPath": "github.com/wingyplus/mylog",
+	"GoVersion": "devel",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/mgutz/ansi",
+			"Rev": "c286dcecd19ff979eeb73ea444e479b903f2cfcb"
+		},
+		{
+			"ImportPath": "gopkg.in/natefinch/lumberjack.v2",
+			"Comment": "v1.0-12-gd28785c",
+			"Rev": "d28785c2f27cd682d872df46ccd8232843629f54"
+		}
+	]
+}
