@@ -16,6 +16,9 @@ func init() {
 		return t
 	}
 	pid = 1234
+	caller = func() (fn string, file string, line int) {
+		return "yourfunc", "test.go", 24
+	}
 }
 
 func TestLog(t *testing.T) {
@@ -25,7 +28,7 @@ func TestLog(t *testing.T) {
 
 	Debug("Hello World")
 
-	expected := "DEBUG|17:50:22.615673|1234|26|Hello World\n"
+	expected := "DEBUG|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\n"
 	if s := buf.String(); s != expected {
 		t.Errorf("Expect %s but got %s", expected, s)
 	}
@@ -36,7 +39,7 @@ func TestLog_DoesNotPrintWhenNotAllowed(t *testing.T) {
 	SetOutput(&buf)
 	SetAllowedSeverities(INFO | WARN)
 
-	logger.Write(DEBUG, "Hello World")
+	Debug("Hello World")
 
 	if s := buf.String(); s != "" {
 		t.Errorf("Expect empty string but got %s", s)
@@ -52,11 +55,11 @@ func TestLog_Colors(t *testing.T) {
 		log    func(...interface{})
 		output string
 	}{
-		{Debug, "\033[31mDEBUG|17:50:22.615673|1234|68|Hello World\033[0m\n"},
-		{Info, "\033[32mINFO|17:50:22.615673|1234|68|Hello World\033[0m\n"},
-		{Warn, "\033[33mWARN|17:50:22.615673|1234|68|Hello World\033[0m\n"},
-		{Error, "\033[31mERROR|17:50:22.615673|1234|68|Hello World\033[0m\n"},
-		{Fatal, "\033[31mFATAL|17:50:22.615673|1234|68|Hello World\033[0m\n"},
+		{Debug, "\033[31mDEBUG|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\033[0m\n"},
+		{Info, "\033[32mINFO|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\033[0m\n"},
+		{Warn, "\033[33mWARN|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\033[0m\n"},
+		{Error, "\033[31mERROR|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\033[0m\n"},
+		{Fatal, "\033[31mFATAL|17:50:22.615673|1234|test.go|yourfunc|24|Hello World\033[0m\n"},
 	}
 
 	SetAllowedSeverities(ALL)
@@ -81,7 +84,7 @@ func TestLog_LineNo(t *testing.T) {
 
 	Debug("Test Line Number.")
 
-	expected := "DEBUG|17:50:22.615673|1234|82|Test Line Number.\n"
+	expected := "DEBUG|17:50:22.615673|1234|test.go|yourfunc|24|Test Line Number.\n"
 	if s := buf.String(); s != expected {
 		t.Errorf(`Expect
 			%s

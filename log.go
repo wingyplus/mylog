@@ -21,8 +21,17 @@ func init() {
 }
 
 var (
-	now = time.Now
-	pid = os.Getpid()
+	now    = time.Now
+	pid    = os.Getpid()
+	caller = func() (funcname string, file string, line int) {
+		pc, file, line, ok := runtime.Caller(3)
+		if !ok {
+			line = 0
+			file = ""
+		}
+		funcname = runtime.FuncForPC(pc).Name()
+		return funcname, file, line
+	}
 
 	red    = ansi.ColorFunc("red")
 	green  = ansi.ColorFunc("green")
@@ -83,13 +92,10 @@ func (logger *Logger) Write(severity Severity, v ...interface{}) {
 	default:
 		colorFn = func(s string) string { return s }
 	}
-	_, _, line, ok := runtime.Caller(2)
-	if !ok {
-		line = 0
-	}
 
+	funcname, file, line := caller()
 	timestamp := now().Format(logTimeFormat)
-	msg := colorFn(fmt.Sprintf("%s|%s|%d|%d|%s", severity.String(), timestamp, pid, line, fmt.Sprint(v...)))
+	msg := colorFn(fmt.Sprintf("%s|%s|%d|%s|%s|%d|%s", severity.String(), timestamp, pid, file, funcname, line, fmt.Sprint(v...)))
 
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
