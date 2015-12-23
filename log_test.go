@@ -23,9 +23,9 @@ func TestLog(t *testing.T) {
 	SetOutput(&buf)
 	SetAllowedSeverities(ALL)
 
-	logger.Write(DEBUG, "Hello World")
+	Debug("Hello World")
 
-	expected := "DEBUG|17:50:22.615673|1234|Hello World\n"
+	expected := "DEBUG|17:50:22.615673|1234|26|Hello World\n"
 	if s := buf.String(); s != expected {
 		t.Errorf("Expect %s but got %s", expected, s)
 	}
@@ -49,14 +49,14 @@ func TestLog_Colors(t *testing.T) {
 	}
 
 	colorTestCases := []struct {
-		severity Severity
-		output   string
+		log    func(...interface{})
+		output string
 	}{
-		{DEBUG, "\033[31mDEBUG\033[0m|17:50:22.615673|1234|Hello World\n"},
-		{INFO, "\033[32mINFO\033[0m|17:50:22.615673|1234|Hello World\n"},
-		{WARN, "\033[33mWARN\033[0m|17:50:22.615673|1234|Hello World\n"},
-		{ERROR, "\033[31mERROR\033[0m|17:50:22.615673|1234|Hello World\n"},
-		{FATAL, "\033[31mFATAL\033[0m|17:50:22.615673|1234|Hello World\n"},
+		{Debug, "\033[31mDEBUG|17:50:22.615673|1234|68|Hello World\033[0m\n"},
+		{Info, "\033[32mINFO|17:50:22.615673|1234|68|Hello World\033[0m\n"},
+		{Warn, "\033[33mWARN|17:50:22.615673|1234|68|Hello World\033[0m\n"},
+		{Error, "\033[31mERROR|17:50:22.615673|1234|68|Hello World\033[0m\n"},
+		{Fatal, "\033[31mFATAL|17:50:22.615673|1234|68|Hello World\033[0m\n"},
 	}
 
 	SetAllowedSeverities(ALL)
@@ -65,13 +65,29 @@ func TestLog_Colors(t *testing.T) {
 		var buf bytes.Buffer
 		SetOutput(&buf)
 
-		logger.Write(testcase.severity, "Hello World")
+		testcase.log("Hello World")
 
 		if s := buf.String(); s != testcase.output {
 			t.Errorf("Expect %s but got %s", testcase.output, s)
 		}
 	}
 
+}
+
+func TestLog_LineNo(t *testing.T) {
+	var buf bytes.Buffer
+	SetOutput(&buf)
+	SetAllowedSeverities(ALL)
+
+	Debug("Test Line Number.")
+
+	expected := "DEBUG|17:50:22.615673|1234|82|Test Line Number.\n"
+	if s := buf.String(); s != expected {
+		t.Errorf(`Expect
+			%s
+			but got
+			%s`, expected, s)
+	}
 }
 
 func benchmarkLog(b *testing.B) {
@@ -96,7 +112,7 @@ func newLogger(filename string) *lumberjack.Logger {
 	}
 }
 
-func BenchmarkLog_Lumberjack(b *testing.B) {
+func BenchmarkParallelLog_Lumberjack(b *testing.B) {
 	logger := newLogger("hello-lumberjack.log")
 	defer logger.Close()
 
@@ -106,7 +122,7 @@ func BenchmarkLog_Lumberjack(b *testing.B) {
 	benchmarkLog(b)
 }
 
-func BenchmarkLog_BufferedLumberjack(b *testing.B) {
+func BenchmarkParallelLog_BufferedLumberjack(b *testing.B) {
 	logger := newLogger("hello-buffered-lumberjack.log")
 	defer logger.Close()
 
@@ -114,4 +130,17 @@ func BenchmarkLog_BufferedLumberjack(b *testing.B) {
 	SetAllowedSeverities(ALL)
 
 	benchmarkLog(b)
+}
+
+func BenchmarkLog_BufferedLumberjack_OneSeverity(b *testing.B) {
+	logger := newLogger("hello-buffered-lumberjack-not-parallel.log")
+	defer logger.Close()
+
+	SetOutput(bufio.NewWriter(logger))
+	SetAllowedSeverities(ALL)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Debug("Hello World")
+	}
 }

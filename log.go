@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"sync"
 	"time"
 
@@ -20,8 +21,13 @@ func init() {
 }
 
 var (
-	now            = time.Now
-	pid            = os.Getpid()
+	now = time.Now
+	pid = os.Getpid()
+
+	red    = ansi.ColorFunc("red")
+	green  = ansi.ColorFunc("green")
+	yellow = ansi.ColorFunc("yellow")
+
 	severityColors = map[Severity]func(string) string{
 		DEBUG: ansi.ColorFunc("red"),
 		ERROR: ansi.ColorFunc("red"),
@@ -66,11 +72,28 @@ func (logger *Logger) SetAllowedSeverities(severities Severity) {
 }
 
 func (logger *Logger) Write(severity Severity, v ...interface{}) {
+	var colorFn func(string) string
+	switch severity {
+	case ERROR, FATAL, DEBUG:
+		colorFn = red
+	case INFO:
+		colorFn = green
+	case WARN:
+		colorFn = yellow
+	default:
+		colorFn = func(s string) string { return s }
+	}
+	_, _, line, ok := runtime.Caller(2)
+	if !ok {
+		line = 0
+	}
+
 	timestamp := now().Format(logTimeFormat)
-	msg := fmt.Sprint(v...)
+	msg := colorFn(fmt.Sprintf("%s|%s|%d|%d|%s", severity.String(), timestamp, pid, line, fmt.Sprint(v...)))
+
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
-		fmt.Fprintf(logger.writer, "%s|%s|%d|%s\n", severityColors[severity](severity.String()), timestamp, pid, msg)
+		logger.writer.Write([]byte(msg + "\n"))
 		logger.mu.Unlock()
 	}
 }
