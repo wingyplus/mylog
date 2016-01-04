@@ -1,9 +1,9 @@
 #!/bin/bash
 
-go generate
+godep go generate || exit 1
 
 echo "### Run test -- No color"
-MYLOGCOLOR_DISABLED=1 go test || exit 1
+MYLOGCOLOR_DISABLED=1 godep go test || exit 1
 
 echo "### Run test -- Color"
-go test -run=TestLog_Colors || exit 1
+godep go test -run=TestLog_Colors || exit 1
