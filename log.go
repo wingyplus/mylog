@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"runtime"
 	"sync"
 	"time"
@@ -95,13 +96,22 @@ func (logger *Logger) Write(severity Severity, v ...interface{}) {
 
 	funcname, file, line := caller()
 	timestamp := now().Format(logTimeFormat)
-	msg := colorFn(fmt.Sprintf("%s|%s|%d|%s|%s|%d|%s", severity.String(), timestamp, pid, file, funcname, line, fmt.Sprint(v...)))
+	msg := colorFn(fmt.Sprintf("%s|%s|%d|%s|%s|%d|%s", severity.String(), timestamp, pid, stripgopath(file), funcname, line, fmt.Sprint(v...)))
 
 	if (severity & logger.allowedSeverities) != 0 {
 		logger.mu.Lock()
 		logger.writer.Write([]byte(msg + "\n"))
 		logger.mu.Unlock()
 	}
+}
+
+var gopathPattern = regexp.MustCompile(`.*/src/(.*)`)
+
+func stripgopath(src string) string {
+	if !gopathPattern.MatchString(src) {
+		return src
+	}
+	return gopathPattern.ReplaceAllString(src, "$1")
 }
 
 func Info(v ...interface{})  { logger.Write(INFO, v...) }

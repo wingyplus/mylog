@@ -93,6 +93,22 @@ func TestLog_LineNo(t *testing.T) {
 	}
 }
 
+func TestLog_Filename(t *testing.T) {
+	caller = func() (fn string, file string, line int) {
+		return "yourfunc", "/path/to/gopath/src/ourpackage/test.go", 24
+	}
+	var buf bytes.Buffer
+	SetOutput(&buf)
+	SetAllowedSeverities(ALL)
+
+	Debug("Hello World")
+
+	expected := "DEBUG|17:50:22.615673|1234|ourpackage/test.go|yourfunc|24|Hello World\n"
+	if out := buf.String(); out != expected {
+		t.Errorf("Expect %s but got %s", out, expected)
+	}
+}
+
 func benchmarkLog(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
